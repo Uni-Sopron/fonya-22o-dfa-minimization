@@ -1,0 +1,39 @@
+{
+        "states": [
+            "s1",
+            "s2",
+            "s3"
+        ],
+        "alphabet": [
+            "a",
+            "b",
+            "c",
+            "d"
+        ],
+        "transitions": [
+            {
+                "fromState": "s1",
+                "symbol": "a",
+                "nextState": "s2"
+            },
+            {
+                "fromState": "s2",
+                "symbol": "a",
+                "nextState": "s3"
+            },
+            {
+                "fromState": "s3",
+                "symbol": "a",
+                "nextState": "s3"
+            },
+            {
+                "fromState": "s3",
+                "symbol": "a",
+                "nextState": "s3"
+            }
+        ],
+        "initialState": "s1",
+        "finalStates": [
+            "s2"
+        ]
+}
