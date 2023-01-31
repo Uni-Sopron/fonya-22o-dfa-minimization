@@ -1,6 +1,8 @@
 package hu.wtomee.objects;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class DFA {
@@ -84,6 +86,17 @@ public class DFA {
                 throw new InvalidParameterException("Symbol doesnt exists in transition: " + t.toString());
             }
 
+            // Check if deterministic
+            int counter = 0;
+            for (Transition t2 : transitions) {
+                if (t.symbol.equals(t2.symbol) && t.fromState.equals(t2.fromState)) {
+                    if (t.nextState.equals(t2.nextState) && counter < 2) {
+                        counter++;
+                    } else {
+                        throw new InvalidParameterException("DFA is a not deterministic because of these transitions:" + t + "\n" + t2);
+                    }
+                }
+            }
         }
 
         System.out.println("OK! Transitions checked! ");
@@ -94,16 +107,38 @@ public class DFA {
         return this;
     }
 
-    public DFA input(String input) {
-        if (!alphabet.contains(input))
-            throw new InvalidParameterException("\"" + input + "\" is not valid");
+    public void getAccessiblePart() {
+        List<String> accessibleStates = new ArrayList<>();
+        accessibleStates.add(initialState);
+        currentState = initialState;
+        for (int i = 0; i < transitions.size(); i++) {
+            currentState = transitions.stream()
+                    .filter(transition -> transition.getFromState().equals(currentState))
+                    .findFirst()
+                    .get().getNextState();
+            if(!accessibleStates.contains(currentState))
+                accessibleStates.add(currentState);
+        }
+        states = accessibleStates;
 
+        System.out.println("Accessible states: " + states);
 
-        if(transitions.stream().noneMatch(transition -> transition.getSymbol().equals(input) && transition.getFromState().equals(currentState)))
-            throw new InvalidParameterException("No transition found for input: " + input);
+        transitions = transitions.stream()
+                .filter(transition -> accessibleStates.contains(transition.getNextState())).toList();
+        System.out.println("Transitions: ");
+        for (Transition t : transitions) {
+            System.out.println(t);
+        }
+    }
+    public DFA transitionWithSymbol(String symbol) {
+        if (!alphabet.contains(symbol))
+            throw new InvalidParameterException("\"" + symbol + "\" is not valid");
+
+        if(transitions.stream().noneMatch(transition -> transition.getSymbol().equals(symbol) && transition.getFromState().equals(currentState)))
+            throw new InvalidParameterException("No transition found for symbol: " + symbol);
 
         currentState = transitions.stream()
-                .filter(transition -> transition.getSymbol().equals(input) && transition.getFromState().equals(currentState))
+                .filter(transition -> transition.getSymbol().equals(symbol) && transition.getFromState().equals(currentState))
                 .findFirst()
                 .get().nextState;
 
@@ -114,37 +149,29 @@ public class DFA {
         return finalStates.contains(currentState);
     }
 
-    public DFA checkStates() {
-
-        // Check if States contains all finalStates
-        boolean containsAllFinalStates = states.containsAll(finalStates);
-        if (containsAllFinalStates){
-            System.out.println("OK! States containing all final states");
-        } else {
-            throw new InvalidParameterException("States not containing all final states");
-        }
+    public DFA checkInitState() {
 
         // Check if States contains the initialState
-        boolean containsInitialState = states.contains(initialState);
-        if (containsInitialState) {
+        if (states.contains(initialState)) {
             System.out.println("OK! States containing the initial state");
         } else {
             throw new InvalidParameterException("States not containing the initial state");
         }
 
-        /*
-            Check if States contains all the Transitions from and to states.
-            Also check if Alphabet contains all Symbols from Transitions.
-         */
-        boolean containsTransitionStatesAndSymbols = transitions.stream().anyMatch(transition -> !states.containsAll(List.of(transition.getFromState(), transition.getNextState())) || !alphabet.contains(transition.getSymbol()));
-        if (!containsTransitionStatesAndSymbols) {
-            System.out.println("OK! States containing all transition states and Alphabet contains symbols");
+        return this;
+    }
+
+    public DFA checkFinalStates() {
+        // Check if States contains all finalStates. States wrapped in HashSet for better performance
+        if (new HashSet<>(states).containsAll(finalStates)){
+            System.out.println("OK! States containing all final states");
         } else {
-            throw new InvalidParameterException("States not containing all the transition states and Alphabet not containning symbols");
+            throw new InvalidParameterException("States not containing all final states");
         }
 
         return this;
     }
+
     @Override
     public String toString() {
         return "DFA{" +

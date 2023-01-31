@@ -8,6 +8,8 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class App {
@@ -24,15 +26,17 @@ public class App {
         String inputString = readInputString();
 
         runDfaWithInput(inputString);
-
+        dfa.getAccessiblePart();
 
     }
+
+
 
     private static void runDfaWithInput(String inputString) {
         CharacterIterator it = new StringCharacterIterator(inputString);
         dfa.resetState();
         while(it.current() != CharacterIterator.DONE) {
-            if(dfa.input(String.valueOf(it.current())).isAccepting()) {
+            if(dfa.transitionWithSymbol(String.valueOf(it.current())).isAccepting()) {
                 System.out.println("ACCEPTED");
             };
             it.next();
@@ -40,7 +44,7 @@ public class App {
     }
 
     private static void checkDfa() {
-        dfa.checkStates().checkTransitions();
+        dfa.checkInitState().checkFinalStates().checkTransitions();
     }
 
     private static String readInputString() {

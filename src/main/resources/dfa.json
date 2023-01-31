@@ -2,7 +2,9 @@
         "states": [
             "s1",
             "s2",
-            "s3"
+            "s3",
+            "s4",
+            "s5"
         ],
         "alphabet": [
             "a",
@@ -26,11 +28,11 @@
                 "symbol": "a",
                 "nextState": "s3"
             },
-            {
-                "fromState": "s3",
-                "symbol": "a",
-                "nextState": "s3"
-            }
+          {
+            "fromState": "s4",
+            "symbol": "a",
+            "nextState": "s5"
+          }
         ],
         "initialState": "s1",
         "finalStates": [
